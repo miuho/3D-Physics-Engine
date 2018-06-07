@@ -1,0 +1,50 @@
+*****************
+* writeup.txt   *
+* HingOn Miu    *
+* hmiu          *
+*****************
+
+Implementation decisions:
+1.) In detecting collisions between sphere and triangle, we need to check if
+    the sphere is within the triangle range before checking the distance from
+    the sphere to the triangle. To check whether the projected sphere is
+    within the triangle, instead of changing everything to barycentric
+    coordinates (which is relatively slow), I simply compare the cross product
+    of an edge and the displacement of an interior vertex and the projected
+    point. Therefore, if the dot product of the two cross products is positive,
+    it means that the projected point is on the same side as an interior
+    vertex, which implies that the projected point must be within the triangle.
+    Two cross products and one dot product is far more efficient than the
+    whole barycentric coordinates calculation. This same side calculation
+    method is referenced from "http://www.blackpawn.com/texts/pointinpoly/".
+    
+2.) Instead of returning the change in position and change in orientation from
+    step_position and step_orientation, I decided to change them to return
+    the acceleration and angular acceleration. This greatly simplies the
+    implmentation of RK4 because after all the forces are applied, I can simply
+    call them to get the acceleration and angular acceleration of the newest
+    state.
+    
+3.) Since we can assume that at most one collision happens for each sphere at
+    a time (clarified on Piazza), I have a boolean flag named collided to
+    keep a record of whether the sphere have collided already. Therefore,
+    this optimizes the collision detection process because spheres that
+    collided would not be checked for another collision.
+    
+4.) I have a exert_force function to apply gravity and spring force to a
+    sphere. This implmentation helps me to calculate RK4 integration because
+    I can use exert_force to apply all forces to calculate the current state
+    and clear the force and torque accumulators to prepare calculating the
+    next state.
+    
+5.) The RK4 calculation code is placed in physics.cpp because the step function
+    loops through every sphere to update the changes in position, velocity,
+    orientation and angular velocity. All the interections among geometries
+    are also processed in the step function (collisions lead to velocity
+    changes). Most importantly, the spring force needs to be applied for
+    each sphere when calculating RK4 integration. Therefore, it is more
+    convinient and logical that the RK4 calculation code is placed in
+    physics.cpp instead of spherebody.cpp.
+    
+    
+    
